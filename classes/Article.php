@@ -27,9 +27,15 @@ class Article
 
     /**
      * The publication data and time
-     * @var datetime
+     * @var string
      */
     public $published_at;
+
+    /**
+     * Validation errors
+     * @var array
+     */
+    public $errors = [];
 
     /**
      * Get all the articles
@@ -74,5 +80,74 @@ class Article
 
             return $stmt->fetch();
         }
+    }
+
+    /**
+     * Update the article with its current property values
+     * 
+     * @param object $conn Connection to the database
+     * 
+     * @return boolean True if the update was successful, false otherwise
+     */
+    public function update($conn)
+    {
+        if ($this->validate()) {
+            $sql = "UPDATE article
+                SET title = :title,
+                    content = :content,
+                    published_at = :published_at
+                WHERE id = :id";
+
+            $stmt = $conn->prepare($sql);
+
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->bindValue(':title', $this->title, PDO::PARAM_STR);
+            $stmt->bindValue(':content', $this->content, PDO::PARAM_STR);
+
+            if ($this->published_at == '') {
+                $stmt->bindValue(':published_at', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue(':published_at', $this->published_at, PDO::PARAM_STR);
+            }
+
+            return $stmt->execute();
+        } else {
+            return false;
+        }
+
+    }
+
+    /**
+     * Validate the article properties, putting any validation error messages in the $errors property
+     *
+     * @return boolean True if the current properties are valid, false otherwise
+     */
+    protected function validate()
+    {
+        if ($this->title == '') {
+            $this->errors[] = 'Title is required';
+        }
+        if ($this->content == '') {
+            $this->errors[] = 'Content is required';
+        }
+
+        if ($this->published_at != '') {
+            $date_time = date_create_from_format('Y-m-d H:i:s', $this->published_at);
+            
+            if ($date_time === false) {
+
+                $this->errors[] = 'Invalid date and time';
+
+            } else {
+
+                $date_errors = date_get_last_errors();
+
+                if ($date_errors['warning_count'] > 0) {
+                    $errors[] = 'Invalid date and time';
+                }
+            }
+        }
+
+        return empty($this->errors);
     }
 }
