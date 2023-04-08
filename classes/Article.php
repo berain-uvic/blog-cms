@@ -210,15 +210,43 @@ class Article
     {
         if ($ids) {
             $sql = "INSERT IGNORE INTO article_category (article_id, category_id)
-                    VALUES ({$this->id}, :category_id)";
+                    VALUES ";
+
+            $values = [];
+
+            foreach ($ids as $id) {
+                $values[] = "({$this->id}, ?)";
+            }
+
+            $sql .= implode(", ", $values);
 
             $stmt = $conn->prepare($sql);
 
-            foreach ($ids as $id) {
-                $stmt->bindValue(':category_id', $id, PDO::PARAM_INT);
-                $stmt->execute();
+            foreach ($ids as $i => $id) {
+                $stmt->bindValue($i + 1, $id, PDO::PARAM_INT);
             }
+
+            $stmt->execute();
         }
+
+        $sql = "DELETE FROM article_category
+        WHERE article_id = {$this->id}";
+
+        if ($ids) {
+
+            $placeholders = array_fill(0, count($ids), '?');
+
+            $sql .= " AND category_id NOT IN (" . implode(", ", $placeholders) . ")";
+
+        }
+
+        $stmt = $conn->prepare($sql);
+
+        foreach ($ids as $i => $id) {
+            $stmt->bindValue($i + 1, $id, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
     }
 
     /**
