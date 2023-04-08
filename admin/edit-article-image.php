@@ -85,9 +85,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (move_uploaded_file($_FILES['file']['tmp_name'], $destination)) {
 
+            $previous_image = $article->image_file;
+
             if ($article->setImageFile($conn, $filename)) {
 
-                Url::redirect("/admin/article.php?id={$article->id}");
+                if ($previous_image) {
+                    unlink("../uploads/$previous_image");
+                }
+
+                Url::redirect("/admin/edit-article-image.php?id={$article->id}");
 
             }
             
@@ -97,14 +103,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             throw new Exception('Unable to move uploaded file');
 
         }
-        
 
     } catch (Exception $e) {
         echo $e->getMessage();
     }
-    
-
-    
 }
 
 ?>
@@ -114,6 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <?php if ($article->image_file) : ?>
     <img src="/uploads/<?= $article->image_file; ?>">
+    <a href="delete-article-image.php?id=<?= $article->id; ?>">Delete</a>
 <?php endif; ?>
 
 <form method="post" enctype="multipart/form-data">
