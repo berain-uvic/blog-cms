@@ -59,7 +59,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         }
 
-        $destination = "../uploads/" . $_FILES['file']['name'];
+        // Move the uploaded file
+        $pathinfo = pathinfo($_FILES['file']['name']);
+
+        $base = $pathinfo['filename'];
+
+        $base = preg_replace('/[^a-zA-Z0-9_-]/', '_', $base);
+
+        $filename = $base . "." . $pathinfo['extension'];
+
+        $destination = "../uploads/$filename";
 
         if (move_uploaded_file($_FILES['file']['tmp_name'], $destination)) {
 
