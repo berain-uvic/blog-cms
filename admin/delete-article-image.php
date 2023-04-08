@@ -29,7 +29,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         Url::redirect("/admin/edit-article-image.php?id={$article->id}");
-
     }
 }
 
