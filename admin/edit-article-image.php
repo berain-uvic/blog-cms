@@ -66,6 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         $base = preg_replace('/[^a-zA-Z0-9_-]/', '_', $base);
 
+        $base = mb_substr($base, 0, 200);
+
         $filename = $base . "." . $pathinfo['extension'];
 
         $destination = "../uploads/$filename";
@@ -83,7 +85,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (move_uploaded_file($_FILES['file']['tmp_name'], $destination)) {
 
-            echo "File uploaded successfully";
+            if ($article->setImageFile($conn, $filename)) {
+
+                Url::redirect("/admin/article.php?id={$article->id}");
+
+            }
+            
 
         } else {
 
@@ -104,6 +111,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <?php require '../includes/header.php'; ?>
 
 <h2>Edit article image</h2>
+
+<?php if ($article->image_file) : ?>
+    <img src="/uploads/<?= $article->image_file; ?>">
+<?php endif; ?>
 
 <form method="post" enctype="multipart/form-data">
 
