@@ -13,3 +13,21 @@ $("a.delete").on("click", function(e) {
   }
 
 });
+
+$.validator.addMethod("dateTime", function(value, element) {
+  return (value == "") || ! isNaN(Date.parse(value));
+}, "Must be a valid data and time");
+
+$("#formArticle").validate({
+  rules: {
+    title: {
+      required: true
+    },
+    content: {
+      required: true
+    },
+    published_at: {
+      dateTime: true
+    }
+  }
+});
