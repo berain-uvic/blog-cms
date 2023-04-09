@@ -37,6 +37,7 @@ $articles = Article::getPage($conn, $paginator->limit, $paginator->offset);
                             <time><?= $article['published_at'] ?></time>
                         <?php else: ?>
                             Unpublished
+                            <button class="publish" data-id="<?= $article['id'] ?>">Publish</button>
                         <?php endif; ?>
                     </td>
                 </tr>
